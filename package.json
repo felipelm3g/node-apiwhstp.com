@@ -4,6 +4,14 @@
   "description": "n8n community node for APIWHSTP (API WhatsApp REST + Webhook)",
   "license": "MIT",
   "author": "APIWHSTP",
+  "homepage": "https://github.com/felipelm3g/node-apiwhstp.com#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/felipelm3g/node-apiwhstp.com.git"
+  },
+  "bugs": {
+    "url": "https://github.com/felipelm3g/node-apiwhstp.com/issues"
+  },
   "keywords": [
     "n8n-community-node-package",
     "n8n-nodes",
