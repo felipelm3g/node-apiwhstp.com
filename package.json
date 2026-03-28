@@ -1,0 +1,48 @@
+{
+  "name": "n8n-nodes-apiwhstp",
+  "version": "0.1.0",
+  "description": "n8n community node for APIWHSTP (API WhatsApp REST + Webhook)",
+  "license": "MIT",
+  "author": "APIWHSTP",
+  "keywords": [
+    "n8n-community-node-package",
+    "n8n-nodes",
+    "apiwhstp",
+    "whatsapp"
+  ],
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json && gulp build",
+    "dev": "tsc -w -p tsconfig.json",
+    "lint": "eslint .",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "prepublishOnly": "npm run build && npm run lint && npm run typecheck"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "n8n": {
+    "n8nNodesApiVersion": 1,
+    "credentials": [
+      "dist/credentials/ApiWhstpApi.credentials.js"
+    ],
+    "nodes": [
+      "dist/nodes/ApiWhstp/ApiWhstp.node.js"
+    ]
+  },
+  "devDependencies": {
+    "@types/node": "^20.12.12",
+    "@typescript-eslint/eslint-plugin": "^7.11.0",
+    "@typescript-eslint/parser": "^7.11.0",
+    "eslint": "^8.57.0",
+    "gulp": "^4.0.2",
+    "n8n-core": "^1.0.0",
+    "n8n-nodes-base": "^1.0.0",
+    "n8n-workflow": "^1.0.0",
+    "typescript": "5.5.4"
+  }
+}
