@@ -19,6 +19,8 @@ jobs:
         with:
           node-version: "20"
           cache: "npm"
+          registry-url: "https://registry.npmjs.org"
+          always-auth: true
 
       - name: Update npm
         run: npm install -g npm@latest
@@ -36,5 +38,12 @@ jobs:
         run: npm run typecheck
 
       - name: Publish
-        run: npm publish --provenance --access public
-
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          VERSION="$(node -p "require('./package.json').version")"
+          if npm view "n8n-nodes-apiwhstp@${VERSION}" version >/dev/null 2>&1; then
+            echo "Already published: n8n-nodes-apiwhstp@${VERSION}"
+            exit 0
+          fi
+          npm publish --provenance --access public
