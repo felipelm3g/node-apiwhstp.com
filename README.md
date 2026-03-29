@@ -1,5 +1,5 @@
 # n8n-nodes-apiwhstp
-Community node do n8n para integrar com a APIWHSTP (API WhatsApp REST + Webhook).
+Community node do n8n para integrar com a APIWHSTP (API WhatsApp REST).
 
 ## Instalação
 
@@ -23,6 +23,5 @@ Depois reinicie o n8n e procure por “APIWHSTP” na lista de nodes.
 - Localização: enviar localização (/send-location)
 - Utilitários: checar WhatsApp (/check-whatsapp)
 - Grupos: listar e limpar cache (/groups, /groups/cache/clear)
-- Webhook: configurar e filtrar eventos de grupos (/api/webhook, /api/group-webhook)
 - Atendimento: abrir/fechar atendimento humano (/attendance-open, /attendance-close)
 - Staff: listar/adicionar/remover/enviar aviso (/staff, /staff-message)

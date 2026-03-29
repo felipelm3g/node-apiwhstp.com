@@ -12,7 +12,7 @@ class ApiWhstp {
             group: ['output'],
             version: 1,
             subtitle: '={{$parameter["resource"] + ": " + $parameter["operation"]}}',
-            description: 'Integração com API WhatsApp REST + Webhook (APIWHSTP)',
+            description: 'Integração com API WhatsApp REST (APIWHSTP)',
             defaults: {
                 name: 'APIWHSTP',
             },
@@ -37,7 +37,6 @@ class ApiWhstp {
                         { name: 'Localização', value: 'location' },
                         { name: 'Utilitários', value: 'utilities' },
                         { name: 'Grupos', value: 'groups' },
-                        { name: 'Webhook', value: 'webhook' },
                         { name: 'Atendimento', value: 'attendance' },
                         { name: 'Staff', value: 'staff' },
                     ],
@@ -111,25 +110,6 @@ class ApiWhstp {
                     options: [
                         { name: 'Limpar Cache', value: 'clearCache' },
                         { name: 'Listar', value: 'listGroups' },
-                    ],
-                },
-                {
-                    displayName: 'Operação',
-                    name: 'operation',
-                    type: 'options',
-                    noDataExpression: true,
-                    default: 'getConfig',
-                    displayOptions: {
-                        show: {
-                            resource: ['webhook'],
-                        },
-                    },
-                    options: [
-                        { name: 'Obter Configuração', value: 'getConfig' },
-                        { name: 'Remover Configuração', value: 'deleteConfig' },
-                        { name: 'Salvar Configuração', value: 'setConfig' },
-                        { name: 'Ver Preferências (Grupos)', value: 'getGroupPreferences' },
-                        { name: 'Editar Preferência (Grupo)', value: 'setGroupPreference' },
                     ],
                 },
                 {
@@ -356,72 +336,6 @@ class ApiWhstp {
                     },
                 },
                 {
-                    displayName: 'URL',
-                    name: 'webhookUrl',
-                    type: 'string',
-                    default: '',
-                    required: true,
-                    displayOptions: {
-                        show: {
-                            resource: ['webhook'],
-                            operation: ['setConfig'],
-                        },
-                    },
-                },
-                {
-                    displayName: 'Auth Header Name',
-                    name: 'authHeaderName',
-                    type: 'string',
-                    default: '',
-                    displayOptions: {
-                        show: {
-                            resource: ['webhook'],
-                            operation: ['setConfig'],
-                        },
-                    },
-                },
-                {
-                    displayName: 'Auth Header Value',
-                    name: 'authHeaderValue',
-                    type: 'string',
-                    default: '',
-                    typeOptions: {
-                        password: true,
-                    },
-                    displayOptions: {
-                        show: {
-                            resource: ['webhook'],
-                            operation: ['setConfig'],
-                        },
-                    },
-                },
-                {
-                    displayName: 'Group ID',
-                    name: 'webhookGroupId',
-                    type: 'string',
-                    default: '',
-                    required: true,
-                    displayOptions: {
-                        show: {
-                            resource: ['webhook'],
-                            operation: ['setGroupPreference'],
-                        },
-                    },
-                },
-                {
-                    displayName: 'Habilitado',
-                    name: 'webhookEnabled',
-                    type: 'boolean',
-                    default: true,
-                    required: true,
-                    displayOptions: {
-                        show: {
-                            resource: ['webhook'],
-                            operation: ['setGroupPreference'],
-                        },
-                    },
-                },
-                {
                     displayName: 'Phone',
                     name: 'attendancePhone',
                     type: 'string',
@@ -556,33 +470,6 @@ class ApiWhstp {
                 }
                 else if (resource === 'groups' && operation === 'clearCache') {
                     responseData = await GenericFunctions_1.apiRequest.call(this, 'POST', '/groups/cache/clear');
-                }
-                else if (resource === 'webhook' && operation === 'getConfig') {
-                    responseData = await GenericFunctions_1.apiRequest.call(this, 'GET', '/api/webhook');
-                }
-                else if (resource === 'webhook' && operation === 'setConfig') {
-                    const url = this.getNodeParameter('webhookUrl', itemIndex);
-                    const authHeaderName = this.getNodeParameter('authHeaderName', itemIndex) || undefined;
-                    const authHeaderValue = this.getNodeParameter('authHeaderValue', itemIndex) || undefined;
-                    const body = { url };
-                    if (authHeaderName)
-                        body.authHeaderName = authHeaderName;
-                    if (authHeaderValue)
-                        body.authHeaderValue = authHeaderValue;
-                    responseData = await GenericFunctions_1.apiRequest.call(this, 'POST', '/api/webhook', { body });
-                }
-                else if (resource === 'webhook' && operation === 'deleteConfig') {
-                    responseData = await GenericFunctions_1.apiRequest.call(this, 'DELETE', '/api/webhook');
-                }
-                else if (resource === 'webhook' && operation === 'getGroupPreferences') {
-                    responseData = await GenericFunctions_1.apiRequest.call(this, 'GET', '/api/group-webhook');
-                }
-                else if (resource === 'webhook' && operation === 'setGroupPreference') {
-                    const groupId = this.getNodeParameter('webhookGroupId', itemIndex);
-                    const enabled = this.getNodeParameter('webhookEnabled', itemIndex);
-                    responseData = await GenericFunctions_1.apiRequest.call(this, 'PUT', '/api/group-webhook', {
-                        body: { groupId, enabled },
-                    });
                 }
                 else if (resource === 'attendance' && operation === 'open') {
                     const phone = this.getNodeParameter('attendancePhone', itemIndex);
