@@ -124,6 +124,7 @@ class ApiWhstp {
                         },
                     },
                     options: [
+                        { name: 'Consultar', value: 'get' },
                         { name: 'Abrir Atendimento', value: 'open' },
                         { name: 'Fechar Atendimento', value: 'close' },
                     ],
@@ -349,6 +350,18 @@ class ApiWhstp {
                     },
                 },
                 {
+                    displayName: 'Phone',
+                    name: 'attendanceQueryPhone',
+                    type: 'string',
+                    default: '',
+                    displayOptions: {
+                        show: {
+                            resource: ['attendance'],
+                            operation: ['get'],
+                        },
+                    },
+                },
+                {
                     displayName: 'Mensagem',
                     name: 'attendanceMessage',
                     type: 'string',
@@ -470,6 +483,13 @@ class ApiWhstp {
                 }
                 else if (resource === 'groups' && operation === 'clearCache') {
                     responseData = await GenericFunctions_1.apiRequest.call(this, 'POST', '/groups/cache/clear');
+                }
+                else if (resource === 'attendance' && operation === 'get') {
+                    const phone = this.getNodeParameter('attendanceQueryPhone', itemIndex) || '';
+                    const qs = {};
+                    if (phone)
+                        qs.phone = phone;
+                    responseData = await GenericFunctions_1.apiRequest.call(this, 'GET', '/attendance', Object.keys(qs).length ? { qs } : {});
                 }
                 else if (resource === 'attendance' && operation === 'open') {
                     const phone = this.getNodeParameter('attendancePhone', itemIndex);

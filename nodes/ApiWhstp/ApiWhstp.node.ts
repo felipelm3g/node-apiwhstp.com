@@ -129,6 +129,7 @@ export class ApiWhstp implements INodeType {
 					},
 				},
 				options: [
+					{ name: 'Consultar', value: 'get' },
 					{ name: 'Abrir Atendimento', value: 'open' },
 					{ name: 'Fechar Atendimento', value: 'close' },
 				],
@@ -354,6 +355,18 @@ export class ApiWhstp implements INodeType {
 				},
 			},
 			{
+				displayName: 'Phone',
+				name: 'attendanceQueryPhone',
+				type: 'string',
+				default: '',
+				displayOptions: {
+					show: {
+						resource: ['attendance'],
+						operation: ['get'],
+					},
+				},
+			},
+			{
 				displayName: 'Mensagem',
 				name: 'attendanceMessage',
 				type: 'string',
@@ -484,6 +497,11 @@ export class ApiWhstp implements INodeType {
 					responseData = await apiRequest.call(this, 'GET', '/groups', { qs: { limit } });
 				} else if (resource === 'groups' && operation === 'clearCache') {
 					responseData = await apiRequest.call(this, 'POST', '/groups/cache/clear');
+				} else if (resource === 'attendance' && operation === 'get') {
+					const phone = (this.getNodeParameter('attendanceQueryPhone', itemIndex) as string) || '';
+					const qs: IDataObject = {};
+					if (phone) qs.phone = phone;
+					responseData = await apiRequest.call(this, 'GET', '/attendance', Object.keys(qs).length ? { qs } : {});
 				} else if (resource === 'attendance' && operation === 'open') {
 					const phone = this.getNodeParameter('attendancePhone', itemIndex) as string;
 					const message = (this.getNodeParameter('attendanceMessage', itemIndex) as string) || undefined;
