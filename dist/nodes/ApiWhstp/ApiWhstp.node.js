@@ -226,6 +226,7 @@ class ApiWhstp {
                     },
                     default: '',
                     required: true,
+                    description: 'Informe um Data URI (data:<mime>;base64,<dados>). Para áudio PTT, use OGG/Opus (ex.: data:audio/ogg;base64,...). Se o conteúdo estiver em binário, converta para Data URI em um nó (ex.: Function/Code) antes de enviar.',
                     displayOptions: {
                         show: {
                             resource: ['media'],
