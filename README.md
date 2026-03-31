@@ -1,6 +1,10 @@
 # n8n-nodes-apiwhstp
 Community node do n8n para integrar com a APIWHSTP (API WhatsApp REST).
 
+## Importante (Webhook)
+
+Este node **não inclui** os endpoints de **Webhook** da APIWHSTP. Ele foi feito somente para os endpoints REST de envio/gestão. Se você precisar de webhook, use o node **Webhook** nativo do n8n apontando para o seu endpoint e trate os eventos no fluxo.
+
 ## Instalação
 
 No seu n8n:

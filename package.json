@@ -1,6 +1,6 @@
 {
   "name": "n8n-nodes-apiwhstp",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "description": "n8n community node for APIWHSTP (API WhatsApp REST)",
   "license": "MIT",
   "author": "APIWHSTP",
