@@ -37,6 +37,7 @@ class ApiWhstp {
                         { name: 'Localização', value: 'location' },
                         { name: 'Utilitários', value: 'utilities' },
                         { name: 'Grupos', value: 'groups' },
+                        { name: 'Fila', value: 'queue' },
                         { name: 'Atendimento', value: 'attendance' },
                         { name: 'Staff', value: 'staff' },
                     ],
@@ -110,6 +111,22 @@ class ApiWhstp {
                     options: [
                         { name: 'Limpar Cache', value: 'clearCache' },
                         { name: 'Listar', value: 'listGroups' },
+                    ],
+                },
+                {
+                    displayName: 'Operação',
+                    name: 'operation',
+                    type: 'options',
+                    noDataExpression: true,
+                    default: 'list',
+                    displayOptions: {
+                        show: {
+                            resource: ['queue'],
+                        },
+                    },
+                    options: [
+                        { name: 'Consultar', value: 'get' },
+                        { name: 'Remover Item', value: 'delete' },
                     ],
                 },
                 {
@@ -338,6 +355,44 @@ class ApiWhstp {
                     },
                 },
                 {
+                    displayName: 'Id (Job)',
+                    name: 'queueId',
+                    type: 'string',
+                    default: '',
+                    displayOptions: {
+                        show: {
+                            resource: ['queue'],
+                            operation: ['get'],
+                        },
+                    },
+                },
+                {
+                    displayName: 'Status',
+                    name: 'queueStatus',
+                    type: 'string',
+                    default: '',
+                    description: 'Filtro por status (ex.: queued,success ou queued,processing)',
+                    displayOptions: {
+                        show: {
+                            resource: ['queue'],
+                            operation: ['get'],
+                        },
+                    },
+                },
+                {
+                    displayName: 'Id (Job)',
+                    name: 'queueDeleteId',
+                    type: 'string',
+                    default: '',
+                    required: true,
+                    displayOptions: {
+                        show: {
+                            resource: ['queue'],
+                            operation: ['delete'],
+                        },
+                    },
+                },
+                {
                     displayName: 'Phone',
                     name: 'attendancePhone',
                     type: 'string',
@@ -484,6 +539,20 @@ class ApiWhstp {
                 }
                 else if (resource === 'groups' && operation === 'clearCache') {
                     responseData = await GenericFunctions_1.apiRequest.call(this, 'POST', '/groups/cache/clear');
+                }
+                else if (resource === 'queue' && operation === 'get') {
+                    const id = this.getNodeParameter('queueId', itemIndex) || '';
+                    const status = this.getNodeParameter('queueStatus', itemIndex) || '';
+                    const qs = {};
+                    if (id)
+                        qs.id = id;
+                    if (status)
+                        qs.status = status;
+                    responseData = await GenericFunctions_1.apiRequest.call(this, 'GET', '/queue', Object.keys(qs).length ? { qs } : {});
+                }
+                else if (resource === 'queue' && operation === 'delete') {
+                    const id = this.getNodeParameter('queueDeleteId', itemIndex);
+                    responseData = await GenericFunctions_1.apiRequest.call(this, 'DELETE', '/queue', { qs: { id } });
                 }
                 else if (resource === 'attendance' && operation === 'get') {
                     const phone = this.getNodeParameter('attendanceQueryPhone', itemIndex) || '';

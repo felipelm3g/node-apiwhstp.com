@@ -27,5 +27,6 @@ Depois reinicie o n8n e procure por “APIWHSTP” na lista de nodes.
 - Localização: enviar localização (/send-location)
 - Utilitários: checar WhatsApp (/check-whatsapp)
 - Grupos: listar e limpar cache (/groups, /groups/cache/clear)
+- Fila: consultar fila e remover item (/queue)
 - Atendimento: consultar/abrir/fechar atendimento humano (/attendance, /attendance-open, /attendance-close)
 - Staff: listar/adicionar/remover/enviar aviso (/staff, /staff-message)

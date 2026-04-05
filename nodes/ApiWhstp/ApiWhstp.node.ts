@@ -42,6 +42,7 @@ export class ApiWhstp implements INodeType {
 					{ name: 'Localização', value: 'location' },
 					{ name: 'Utilitários', value: 'utilities' },
 					{ name: 'Grupos', value: 'groups' },
+					{ name: 'Fila', value: 'queue' },
 					{ name: 'Atendimento', value: 'attendance' },
 					{ name: 'Staff', value: 'staff' },
 				],
@@ -115,6 +116,22 @@ export class ApiWhstp implements INodeType {
 				options: [
 					{ name: 'Limpar Cache', value: 'clearCache' },
 					{ name: 'Listar', value: 'listGroups' },
+				],
+			},
+			{
+				displayName: 'Operação',
+				name: 'operation',
+				type: 'options',
+				noDataExpression: true,
+				default: 'list',
+				displayOptions: {
+					show: {
+						resource: ['queue'],
+					},
+				},
+				options: [
+					{ name: 'Consultar', value: 'get' },
+					{ name: 'Remover Item', value: 'delete' },
 				],
 			},
 			{
@@ -343,6 +360,44 @@ export class ApiWhstp implements INodeType {
 				},
 			},
 			{
+				displayName: 'Id (Job)',
+				name: 'queueId',
+				type: 'string',
+				default: '',
+				displayOptions: {
+					show: {
+						resource: ['queue'],
+						operation: ['get'],
+					},
+				},
+			},
+			{
+				displayName: 'Status',
+				name: 'queueStatus',
+				type: 'string',
+				default: '',
+				description: 'Filtro por status (ex.: queued,success ou queued,processing)',
+				displayOptions: {
+					show: {
+						resource: ['queue'],
+						operation: ['get'],
+					},
+				},
+			},
+			{
+				displayName: 'Id (Job)',
+				name: 'queueDeleteId',
+				type: 'string',
+				default: '',
+				required: true,
+				displayOptions: {
+					show: {
+						resource: ['queue'],
+						operation: ['delete'],
+					},
+				},
+			},
+			{
 				displayName: 'Phone',
 				name: 'attendancePhone',
 				type: 'string',
@@ -498,6 +553,16 @@ export class ApiWhstp implements INodeType {
 					responseData = await apiRequest.call(this, 'GET', '/groups', { qs: { limit } });
 				} else if (resource === 'groups' && operation === 'clearCache') {
 					responseData = await apiRequest.call(this, 'POST', '/groups/cache/clear');
+				} else if (resource === 'queue' && operation === 'get') {
+					const id = (this.getNodeParameter('queueId', itemIndex) as string) || '';
+					const status = (this.getNodeParameter('queueStatus', itemIndex) as string) || '';
+					const qs: IDataObject = {};
+					if (id) qs.id = id;
+					if (status) qs.status = status;
+					responseData = await apiRequest.call(this, 'GET', '/queue', Object.keys(qs).length ? { qs } : {});
+				} else if (resource === 'queue' && operation === 'delete') {
+					const id = this.getNodeParameter('queueDeleteId', itemIndex) as string;
+					responseData = await apiRequest.call(this, 'DELETE', '/queue', { qs: { id } });
 				} else if (resource === 'attendance' && operation === 'get') {
 					const phone = (this.getNodeParameter('attendanceQueryPhone', itemIndex) as string) || '';
 					const qs: IDataObject = {};
