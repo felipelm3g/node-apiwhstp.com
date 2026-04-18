@@ -58,7 +58,10 @@ export class ApiWhstp implements INodeType {
 						resource: ['messages'],
 					},
 				},
-				options: [{ name: 'Enviar Mensagem', value: 'sendMessage' }],
+				options: [
+					{ name: 'Enviar Lista', value: 'sendList' },
+					{ name: 'Enviar Mensagem', value: 'sendMessage' },
+				],
 			},
 			{
 				displayName: 'Operação',
@@ -236,6 +239,22 @@ export class ApiWhstp implements INodeType {
 					show: {
 						resource: ['messages'],
 						operation: ['sendMessage'],
+					},
+				},
+			},
+			{
+				displayName: 'Dados da Lista (JSON)',
+				name: 'listData',
+				type: 'json',
+				default:
+					'{\n  "title": "Menu principal",\n  "description": "Escolha uma opção",\n  "buttonText": "Ver opções",\n  "footer": "APIWHSTP",\n  "sections": [\n    {\n      "title": "Atendimento",\n      "rows": [\n        {\n          "id": "suporte",\n          "title": "Suporte",\n          "description": "Falar com suporte"\n        }\n      ]\n    }\n  ]\n}',
+				required: true,
+				description:
+					'Payload JSON do send-list. Informe os campos conforme sua API (ex.: title, description, buttonText, sections). O node adiciona automaticamente phone ou groupId de acordo com o destino.',
+				displayOptions: {
+					show: {
+						resource: ['messages'],
+						operation: ['sendList'],
 					},
 				},
 			},
@@ -488,6 +507,16 @@ export class ApiWhstp implements INodeType {
 							: { groupId: this.getNodeParameter('groupId', itemIndex) as string, message, replyId };
 
 					responseData = await apiRequest.call(this, 'POST', '/send-message', { body });
+				} else if (resource === 'messages' && operation === 'sendList') {
+					const destination = this.getNodeParameter('destination', itemIndex) as 'phone' | 'groupId';
+					const listData = this.getNodeParameter('listData', itemIndex) as IDataObject;
+
+					const body =
+						destination === 'phone'
+							? { ...(listData || {}), phone: this.getNodeParameter('phone', itemIndex) as string }
+							: { ...(listData || {}), groupId: this.getNodeParameter('groupId', itemIndex) as string };
+
+					responseData = await apiRequest.call(this, 'POST', '/send-list', { body });
 				} else if (resource === 'media' && operation === 'sendMedia') {
 					const destination = this.getNodeParameter('destination', itemIndex) as 'phone' | 'groupId';
 					const base64 = this.getNodeParameter('base64', itemIndex) as string;

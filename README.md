@@ -22,7 +22,7 @@ Depois reinicie o n8n e procure por “APIWHSTP” na lista de nodes.
 
 ## Operações
 
-- Mensagens: enviar texto (/send-message)
+- Mensagens: enviar texto e lista (/send-message, /send-list)
 - Mídia: enviar mídia (/send-media) e áudio PTT (/send-audio)
 - Localização: enviar localização (/send-location)
 - Utilitários: checar WhatsApp (/check-whatsapp)
