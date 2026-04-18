@@ -509,14 +509,52 @@ export class ApiWhstp implements INodeType {
 					responseData = await apiRequest.call(this, 'POST', '/send-message', { qs, body: { message, replyId } });
 				} else if (resource === 'messages' && operation === 'sendList') {
 					const destination = this.getNodeParameter('destination', itemIndex) as 'phone' | 'groupId';
-					const listData = this.getNodeParameter('listData', itemIndex) as IDataObject;
+					const rawListData = this.getNodeParameter('listData', itemIndex) as unknown;
+					let listData: IDataObject;
+
+					if (typeof rawListData === 'string') {
+						try {
+							listData = JSON.parse(rawListData) as IDataObject;
+						} catch {
+							throw new NodeOperationError(this.getNode(), 'Dados da Lista (JSON) inválido', { itemIndex });
+						}
+					} else if (rawListData && typeof rawListData === 'object' && !Array.isArray(rawListData)) {
+						listData = rawListData as IDataObject;
+					} else {
+						throw new NodeOperationError(this.getNode(), 'Dados da Lista (JSON) inválido', { itemIndex });
+					}
+
+					if (listData.text === undefined && listData.description !== undefined) {
+						listData.text = String(listData.description);
+					}
+
+					if (Array.isArray(listData.sections)) {
+						listData.sections = listData.sections.map((section: unknown) => {
+							if (!section || typeof section !== 'object' || Array.isArray(section)) return section as IDataObject;
+							const sectionObj = section as IDataObject;
+							if (!Array.isArray(sectionObj.rows)) return sectionObj;
+							sectionObj.rows = sectionObj.rows.map((row: unknown) => {
+								if (!row || typeof row !== 'object' || Array.isArray(row)) return row as IDataObject;
+								const rowObj = row as IDataObject;
+								if (rowObj.rowId === undefined && rowObj.id !== undefined) {
+									rowObj.rowId = rowObj.id;
+								}
+								return rowObj;
+							});
+							return sectionObj;
+						});
+					}
 
 					const qs =
 						destination === 'phone'
 							? { phone: this.getNodeParameter('phone', itemIndex) as string }
 							: { groupId: this.getNodeParameter('groupId', itemIndex) as string };
 
-					responseData = await apiRequest.call(this, 'POST', '/send-list', { qs, body: listData || {} });
+					responseData = await apiRequest.call(this, 'POST', '/send-list', {
+						qs,
+						body: listData,
+						headers: { 'Content-Type': 'application/json' },
+					});
 				} else if (resource === 'media' && operation === 'sendMedia') {
 					const destination = this.getNodeParameter('destination', itemIndex) as 'phone' | 'groupId';
 					const base64 = this.getNodeParameter('base64', itemIndex) as string;

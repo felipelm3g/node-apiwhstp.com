@@ -497,11 +497,52 @@ class ApiWhstp {
                 }
                 else if (resource === 'messages' && operation === 'sendList') {
                     const destination = this.getNodeParameter('destination', itemIndex);
-                    const listData = this.getNodeParameter('listData', itemIndex);
+                    const rawListData = this.getNodeParameter('listData', itemIndex);
+                    let listData;
+                    if (typeof rawListData === 'string') {
+                        try {
+                            listData = JSON.parse(rawListData);
+                        }
+                        catch {
+                            throw new n8n_workflow_1.NodeOperationError(this.getNode(), 'Dados da Lista (JSON) inválido', { itemIndex });
+                        }
+                    }
+                    else if (rawListData && typeof rawListData === 'object' && !Array.isArray(rawListData)) {
+                        listData = rawListData;
+                    }
+                    else {
+                        throw new n8n_workflow_1.NodeOperationError(this.getNode(), 'Dados da Lista (JSON) inválido', { itemIndex });
+                    }
+                    if (listData.text === undefined && listData.description !== undefined) {
+                        listData.text = String(listData.description);
+                    }
+                    if (Array.isArray(listData.sections)) {
+                        listData.sections = listData.sections.map((section) => {
+                            if (!section || typeof section !== 'object' || Array.isArray(section))
+                                return section;
+                            const sectionObj = section;
+                            if (!Array.isArray(sectionObj.rows))
+                                return sectionObj;
+                            sectionObj.rows = sectionObj.rows.map((row) => {
+                                if (!row || typeof row !== 'object' || Array.isArray(row))
+                                    return row;
+                                const rowObj = row;
+                                if (rowObj.rowId === undefined && rowObj.id !== undefined) {
+                                    rowObj.rowId = rowObj.id;
+                                }
+                                return rowObj;
+                            });
+                            return sectionObj;
+                        });
+                    }
                     const qs = destination === 'phone'
                         ? { phone: this.getNodeParameter('phone', itemIndex) }
                         : { groupId: this.getNodeParameter('groupId', itemIndex) };
-                    responseData = await GenericFunctions_1.apiRequest.call(this, 'POST', '/send-list', { qs, body: listData || {} });
+                    responseData = await GenericFunctions_1.apiRequest.call(this, 'POST', '/send-list', {
+                        qs,
+                        body: listData,
+                        headers: { 'Content-Type': 'application/json' },
+                    });
                 }
                 else if (resource === 'media' && operation === 'sendMedia') {
                     const destination = this.getNodeParameter('destination', itemIndex);
