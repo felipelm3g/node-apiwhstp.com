@@ -247,10 +247,10 @@ export class ApiWhstp implements INodeType {
 				name: 'listData',
 				type: 'json',
 				default:
-					'{\n  "title": "Menu principal",\n  "description": "Escolha uma opção",\n  "buttonText": "Ver opções",\n  "footer": "APIWHSTP",\n  "sections": [\n    {\n      "title": "Atendimento",\n      "rows": [\n        {\n          "id": "suporte",\n          "title": "Suporte",\n          "description": "Falar com suporte"\n        }\n      ]\n    }\n  ]\n}',
+					'{\n  "text": "Escolha uma opção",\n  "title": "Título da Lista",\n  "footer": "Rodapé da mensagem",\n  "buttonText": "Clique aqui",\n  "sections": [\n    {\n      "title": "Seção 1",\n      "rows": [\n        {\n          "rowId": "option1",\n          "title": "Opção 1",\n          "description": "Descrição da opção 1"\n        }\n      ]\n    }\n  ]\n}',
 				required: true,
 				description:
-					'Payload JSON do send-list. Informe os campos conforme sua API (ex.: title, description, buttonText, sections). O node adiciona automaticamente phone ou groupId de acordo com o destino.',
+					'Payload JSON do send-list (ex.: text, title, footer, buttonText, sections/rows). O node envia phone ou groupId como query string (igual no exemplo do Postman/cURL).',
 				displayOptions: {
 					show: {
 						resource: ['messages'],
@@ -501,54 +501,44 @@ export class ApiWhstp implements INodeType {
 					const message = this.getNodeParameter('message', itemIndex) as string;
 					const replyId = (this.getNodeParameter('replyId', itemIndex) as string) || undefined;
 
-					const body =
+					const qs =
 						destination === 'phone'
-							? { phone: this.getNodeParameter('phone', itemIndex) as string, message, replyId }
-							: { groupId: this.getNodeParameter('groupId', itemIndex) as string, message, replyId };
+							? { phone: this.getNodeParameter('phone', itemIndex) as string }
+							: { groupId: this.getNodeParameter('groupId', itemIndex) as string };
 
-					responseData = await apiRequest.call(this, 'POST', '/send-message', { body });
+					responseData = await apiRequest.call(this, 'POST', '/send-message', { qs, body: { message, replyId } });
 				} else if (resource === 'messages' && operation === 'sendList') {
 					const destination = this.getNodeParameter('destination', itemIndex) as 'phone' | 'groupId';
 					const listData = this.getNodeParameter('listData', itemIndex) as IDataObject;
 
-					const body =
+					const qs =
 						destination === 'phone'
-							? { ...(listData || {}), phone: this.getNodeParameter('phone', itemIndex) as string }
-							: { ...(listData || {}), groupId: this.getNodeParameter('groupId', itemIndex) as string };
+							? { phone: this.getNodeParameter('phone', itemIndex) as string }
+							: { groupId: this.getNodeParameter('groupId', itemIndex) as string };
 
-					responseData = await apiRequest.call(this, 'POST', '/send-list', { body });
+					responseData = await apiRequest.call(this, 'POST', '/send-list', { qs, body: listData || {} });
 				} else if (resource === 'media' && operation === 'sendMedia') {
 					const destination = this.getNodeParameter('destination', itemIndex) as 'phone' | 'groupId';
 					const base64 = this.getNodeParameter('base64', itemIndex) as string;
 					const caption = (this.getNodeParameter('caption', itemIndex) as string) || undefined;
 					const filename = (this.getNodeParameter('filename', itemIndex) as string) || undefined;
 
-					const body =
+					const qs =
 						destination === 'phone'
-							? {
-									phone: this.getNodeParameter('phone', itemIndex) as string,
-									base64,
-									caption,
-									filename,
-								}
-							: {
-									groupId: this.getNodeParameter('groupId', itemIndex) as string,
-									base64,
-									caption,
-									filename,
-								};
+							? { phone: this.getNodeParameter('phone', itemIndex) as string }
+							: { groupId: this.getNodeParameter('groupId', itemIndex) as string };
 
-					responseData = await apiRequest.call(this, 'POST', '/send-media', { body });
+					responseData = await apiRequest.call(this, 'POST', '/send-media', { qs, body: { base64, caption, filename } });
 				} else if (resource === 'media' && operation === 'sendAudio') {
 					const destination = this.getNodeParameter('destination', itemIndex) as 'phone' | 'groupId';
 					const base64 = this.getNodeParameter('base64', itemIndex) as string;
 
-					const body =
+					const qs =
 						destination === 'phone'
-							? { phone: this.getNodeParameter('phone', itemIndex) as string, base64 }
-							: { groupId: this.getNodeParameter('groupId', itemIndex) as string, base64 };
+							? { phone: this.getNodeParameter('phone', itemIndex) as string }
+							: { groupId: this.getNodeParameter('groupId', itemIndex) as string };
 
-					responseData = await apiRequest.call(this, 'POST', '/send-audio', { body });
+					responseData = await apiRequest.call(this, 'POST', '/send-audio', { qs, body: { base64 } });
 				} else if (resource === 'location' && operation === 'sendLocation') {
 					const destination = this.getNodeParameter('destination', itemIndex) as 'phone' | 'groupId';
 					const latitude = this.getNodeParameter('latitude', itemIndex) as number;
@@ -556,24 +546,15 @@ export class ApiWhstp implements INodeType {
 					const title = (this.getNodeParameter('title', itemIndex) as string) || undefined;
 					const description = (this.getNodeParameter('description', itemIndex) as string) || undefined;
 
-					const body =
+					const qs =
 						destination === 'phone'
-							? {
-									phone: this.getNodeParameter('phone', itemIndex) as string,
-									latitude,
-									longitude,
-									title,
-									description,
-								}
-							: {
-									groupId: this.getNodeParameter('groupId', itemIndex) as string,
-									latitude,
-									longitude,
-									title,
-									description,
-								};
+							? { phone: this.getNodeParameter('phone', itemIndex) as string }
+							: { groupId: this.getNodeParameter('groupId', itemIndex) as string };
 
-					responseData = await apiRequest.call(this, 'POST', '/send-location', { body });
+					responseData = await apiRequest.call(this, 'POST', '/send-location', {
+						qs,
+						body: { latitude, longitude, title, description },
+					});
 				} else if (resource === 'utilities' && operation === 'checkWhatsapp') {
 					const phone = this.getNodeParameter('checkPhone', itemIndex) as string;
 					responseData = await apiRequest.call(this, 'GET', '/check-whatsapp', { qs: { phone } });

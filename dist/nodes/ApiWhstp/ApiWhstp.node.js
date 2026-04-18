@@ -241,9 +241,9 @@ class ApiWhstp {
                     displayName: 'Dados da Lista (JSON)',
                     name: 'listData',
                     type: 'json',
-                    default: '{\n  "title": "Menu principal",\n  "description": "Escolha uma opção",\n  "buttonText": "Ver opções",\n  "footer": "APIWHSTP",\n  "sections": [\n    {\n      "title": "Atendimento",\n      "rows": [\n        {\n          "id": "suporte",\n          "title": "Suporte",\n          "description": "Falar com suporte"\n        }\n      ]\n    }\n  ]\n}',
+                    default: '{\n  "text": "Escolha uma opção",\n  "title": "Título da Lista",\n  "footer": "Rodapé da mensagem",\n  "buttonText": "Clique aqui",\n  "sections": [\n    {\n      "title": "Seção 1",\n      "rows": [\n        {\n          "rowId": "option1",\n          "title": "Opção 1",\n          "description": "Descrição da opção 1"\n        }\n      ]\n    }\n  ]\n}',
                     required: true,
-                    description: 'Payload JSON do send-list. Informe os campos conforme sua API (ex.: title, description, buttonText, sections). O node adiciona automaticamente phone ou groupId de acordo com o destino.',
+                    description: 'Payload JSON do send-list (ex.: text, title, footer, buttonText, sections/rows). O node envia phone ou groupId como query string (igual no exemplo do Postman/cURL).',
                     displayOptions: {
                         show: {
                             resource: ['messages'],
@@ -490,46 +490,36 @@ class ApiWhstp {
                     const destination = this.getNodeParameter('destination', itemIndex);
                     const message = this.getNodeParameter('message', itemIndex);
                     const replyId = this.getNodeParameter('replyId', itemIndex) || undefined;
-                    const body = destination === 'phone'
-                        ? { phone: this.getNodeParameter('phone', itemIndex), message, replyId }
-                        : { groupId: this.getNodeParameter('groupId', itemIndex), message, replyId };
-                    responseData = await GenericFunctions_1.apiRequest.call(this, 'POST', '/send-message', { body });
+                    const qs = destination === 'phone'
+                        ? { phone: this.getNodeParameter('phone', itemIndex) }
+                        : { groupId: this.getNodeParameter('groupId', itemIndex) };
+                    responseData = await GenericFunctions_1.apiRequest.call(this, 'POST', '/send-message', { qs, body: { message, replyId } });
                 }
                 else if (resource === 'messages' && operation === 'sendList') {
                     const destination = this.getNodeParameter('destination', itemIndex);
                     const listData = this.getNodeParameter('listData', itemIndex);
-                    const body = destination === 'phone'
-                        ? { ...(listData || {}), phone: this.getNodeParameter('phone', itemIndex) }
-                        : { ...(listData || {}), groupId: this.getNodeParameter('groupId', itemIndex) };
-                    responseData = await GenericFunctions_1.apiRequest.call(this, 'POST', '/send-list', { body });
+                    const qs = destination === 'phone'
+                        ? { phone: this.getNodeParameter('phone', itemIndex) }
+                        : { groupId: this.getNodeParameter('groupId', itemIndex) };
+                    responseData = await GenericFunctions_1.apiRequest.call(this, 'POST', '/send-list', { qs, body: listData || {} });
                 }
                 else if (resource === 'media' && operation === 'sendMedia') {
                     const destination = this.getNodeParameter('destination', itemIndex);
                     const base64 = this.getNodeParameter('base64', itemIndex);
                     const caption = this.getNodeParameter('caption', itemIndex) || undefined;
                     const filename = this.getNodeParameter('filename', itemIndex) || undefined;
-                    const body = destination === 'phone'
-                        ? {
-                            phone: this.getNodeParameter('phone', itemIndex),
-                            base64,
-                            caption,
-                            filename,
-                        }
-                        : {
-                            groupId: this.getNodeParameter('groupId', itemIndex),
-                            base64,
-                            caption,
-                            filename,
-                        };
-                    responseData = await GenericFunctions_1.apiRequest.call(this, 'POST', '/send-media', { body });
+                    const qs = destination === 'phone'
+                        ? { phone: this.getNodeParameter('phone', itemIndex) }
+                        : { groupId: this.getNodeParameter('groupId', itemIndex) };
+                    responseData = await GenericFunctions_1.apiRequest.call(this, 'POST', '/send-media', { qs, body: { base64, caption, filename } });
                 }
                 else if (resource === 'media' && operation === 'sendAudio') {
                     const destination = this.getNodeParameter('destination', itemIndex);
                     const base64 = this.getNodeParameter('base64', itemIndex);
-                    const body = destination === 'phone'
-                        ? { phone: this.getNodeParameter('phone', itemIndex), base64 }
-                        : { groupId: this.getNodeParameter('groupId', itemIndex), base64 };
-                    responseData = await GenericFunctions_1.apiRequest.call(this, 'POST', '/send-audio', { body });
+                    const qs = destination === 'phone'
+                        ? { phone: this.getNodeParameter('phone', itemIndex) }
+                        : { groupId: this.getNodeParameter('groupId', itemIndex) };
+                    responseData = await GenericFunctions_1.apiRequest.call(this, 'POST', '/send-audio', { qs, body: { base64 } });
                 }
                 else if (resource === 'location' && operation === 'sendLocation') {
                     const destination = this.getNodeParameter('destination', itemIndex);
@@ -537,22 +527,13 @@ class ApiWhstp {
                     const longitude = this.getNodeParameter('longitude', itemIndex);
                     const title = this.getNodeParameter('title', itemIndex) || undefined;
                     const description = this.getNodeParameter('description', itemIndex) || undefined;
-                    const body = destination === 'phone'
-                        ? {
-                            phone: this.getNodeParameter('phone', itemIndex),
-                            latitude,
-                            longitude,
-                            title,
-                            description,
-                        }
-                        : {
-                            groupId: this.getNodeParameter('groupId', itemIndex),
-                            latitude,
-                            longitude,
-                            title,
-                            description,
-                        };
-                    responseData = await GenericFunctions_1.apiRequest.call(this, 'POST', '/send-location', { body });
+                    const qs = destination === 'phone'
+                        ? { phone: this.getNodeParameter('phone', itemIndex) }
+                        : { groupId: this.getNodeParameter('groupId', itemIndex) };
+                    responseData = await GenericFunctions_1.apiRequest.call(this, 'POST', '/send-location', {
+                        qs,
+                        body: { latitude, longitude, title, description },
+                    });
                 }
                 else if (resource === 'utilities' && operation === 'checkWhatsapp') {
                     const phone = this.getNodeParameter('checkPhone', itemIndex);
