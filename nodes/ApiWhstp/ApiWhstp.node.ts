@@ -18,6 +18,7 @@ export class ApiWhstp implements INodeType {
 		version: 1,
 		subtitle: '={{$parameter["resource"] + ": " + $parameter["operation"]}}',
 		description: 'Integração com API WhatsApp REST (APIWHSTP)',
+		usableAsTool: true,
 		defaults: {
 			name: 'APIWHSTP',
 		},
