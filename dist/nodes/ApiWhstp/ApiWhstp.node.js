@@ -36,6 +36,7 @@ class ApiWhstp {
                         { name: 'Mensagens', value: 'messages' },
                         { name: 'Mídia', value: 'media' },
                         { name: 'Localização', value: 'location' },
+                        { name: 'Webhook', value: 'webhook' },
                         { name: 'Utilitários', value: 'utilities' },
                         { name: 'Grupos', value: 'groups' },
                         { name: 'Fila', value: 'queue' },
@@ -87,6 +88,25 @@ class ApiWhstp {
                         },
                     },
                     options: [{ name: 'Enviar Localização', value: 'sendLocation' }],
+                },
+                {
+                    displayName: 'Operação',
+                    name: 'operation',
+                    type: 'options',
+                    noDataExpression: true,
+                    default: 'getConfig',
+                    displayOptions: {
+                        show: {
+                            resource: ['webhook'],
+                        },
+                    },
+                    options: [
+                        { name: 'Consultar Configuração', value: 'getConfig' },
+                        { name: 'Listar Preferências de Grupo', value: 'listGroupPreferences' },
+                        { name: 'Remover Configuração', value: 'deleteConfig' },
+                        { name: 'Salvar Configuração', value: 'saveConfig' },
+                        { name: 'Atualizar Preferência de Grupo', value: 'updateGroupPreference' },
+                    ],
                 },
                 {
                     displayName: 'Operação',
@@ -344,6 +364,72 @@ class ApiWhstp {
                     },
                 },
                 {
+                    displayName: 'Webhook URL',
+                    name: 'webhookUrl',
+                    type: 'string',
+                    default: '',
+                    required: true,
+                    displayOptions: {
+                        show: {
+                            resource: ['webhook'],
+                            operation: ['saveConfig'],
+                        },
+                    },
+                },
+                {
+                    displayName: 'Nome do Header de Autenticação',
+                    name: 'webhookAuthHeaderName',
+                    type: 'string',
+                    default: '',
+                    displayOptions: {
+                        show: {
+                            resource: ['webhook'],
+                            operation: ['saveConfig'],
+                        },
+                    },
+                },
+                {
+                    displayName: 'Valor do Header de Autenticação',
+                    name: 'webhookAuthHeaderValue',
+                    type: 'string',
+                    default: '',
+                    typeOptions: {
+                        password: true,
+                    },
+                    displayOptions: {
+                        show: {
+                            resource: ['webhook'],
+                            operation: ['saveConfig'],
+                        },
+                    },
+                },
+                {
+                    displayName: 'Group ID',
+                    name: 'webhookGroupId',
+                    type: 'string',
+                    default: '',
+                    required: true,
+                    displayOptions: {
+                        show: {
+                            resource: ['webhook'],
+                            operation: ['updateGroupPreference'],
+                        },
+                    },
+                },
+                {
+                    displayName: 'Habilitado',
+                    name: 'webhookGroupEnabled',
+                    type: 'boolean',
+                    default: true,
+                    required: true,
+                    displayOptions: {
+                        show: {
+                            resource: ['webhook'],
+                            operation: ['updateGroupPreference'],
+                        },
+                    },
+                },
+                {
                     displayName: 'Phone',
                     name: 'checkPhone',
                     type: 'string',
@@ -575,6 +661,30 @@ class ApiWhstp {
                     responseData = await GenericFunctions_1.apiRequest.call(this, 'POST', '/send-location', {
                         qs,
                         body: { latitude, longitude, title, description },
+                    });
+                }
+                else if (resource === 'webhook' && operation === 'getConfig') {
+                    responseData = await GenericFunctions_1.apiRequest.call(this, 'GET', '/api/webhook');
+                }
+                else if (resource === 'webhook' && operation === 'saveConfig') {
+                    const url = this.getNodeParameter('webhookUrl', itemIndex);
+                    const authHeaderName = this.getNodeParameter('webhookAuthHeaderName', itemIndex) || undefined;
+                    const authHeaderValue = this.getNodeParameter('webhookAuthHeaderValue', itemIndex) || undefined;
+                    responseData = await GenericFunctions_1.apiRequest.call(this, 'POST', '/api/webhook', {
+                        body: { url, authHeaderName, authHeaderValue },
+                    });
+                }
+                else if (resource === 'webhook' && operation === 'deleteConfig') {
+                    responseData = await GenericFunctions_1.apiRequest.call(this, 'DELETE', '/api/webhook');
+                }
+                else if (resource === 'webhook' && operation === 'listGroupPreferences') {
+                    responseData = await GenericFunctions_1.apiRequest.call(this, 'GET', '/api/group-webhook');
+                }
+                else if (resource === 'webhook' && operation === 'updateGroupPreference') {
+                    const groupId = this.getNodeParameter('webhookGroupId', itemIndex);
+                    const enabled = this.getNodeParameter('webhookGroupEnabled', itemIndex);
+                    responseData = await GenericFunctions_1.apiRequest.call(this, 'PUT', '/api/group-webhook', {
+                        body: { groupId, enabled },
                     });
                 }
                 else if (resource === 'utilities' && operation === 'checkWhatsapp') {
